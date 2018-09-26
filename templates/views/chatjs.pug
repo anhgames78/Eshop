@@ -1,0 +1,74 @@
+script(src="/socket.io/socket.io.js")
+script.
+	const chatPage   = $(document);
+	const chatWindow = $('.chatbubble');
+	const chatHeader = chatWindow.find('.unexpanded');
+	const chatBody   = chatWindow.find('.expanded');
+	const chatBoard  = chatBody.find('ul.messages');
+	const chatMsg    = chatBody.find('#newMessage');
+	const chatButton = chatBody.find('#mybutton');
+	const adminStatus = chatHeader.find('#adminStatus');
+	var socket = io.connect();
+	
+	chatPage.ready(function() {
+		if (#{user.isAdmin}) {chatWindow.hide();}
+		ToggleChatWindow();
+		chatHeader.click(function(){ToggleChatWindow();});
+		chatButton.click(function(){SendMessage();});
+		chatMsg.keydown(function(event){
+			if ( event.which == 13 ){
+				SendMessage();
+				event.preventDefault();
+			}
+		});
+		socket.emit('initUser', ['#{user.email}','#{user.isAdmin}','#{sessionID}']);
+		
+		socket.on('relay-to-user',function(data){
+			chatBoard.append(
+				`<li class="clearfix message support">
+				<div class="sender">Admin vua gui den ban:</div>
+				<div class="message">`+data+`</div>
+				</li>`
+			);
+			chatBoard.scrollTop(chatBoard.get(0).scrollHeight);
+		});
+		
+		socket.on('relay-to-allUser',function(data){
+			chatBoard.append(
+				`<li class="clearfix message support">
+				<div class="sender">Admin vua gui den tat ca:</div>
+				<div class="message">`+data+`</div>
+				</li>`
+			);
+			chatBoard.scrollTop(chatBoard.get(0).scrollHeight);
+		});
+		
+		socket.on('is-admin-online',function(data){
+			if (data===true) {
+				adminStatus.text('online.');
+			} else {
+				adminStatus.text('offline.');
+			}
+		});
+		
+	});	
+	
+	var ToggleChatWindow = function(){
+		chatWindow.toggleClass('opened');
+		chatHeader.find('#title').text(chatWindow.hasClass('opened') ? 'Minimize Chat Window. Admin is ' : 'Chat with Support. Admin is ');
+	}
+	
+	var SendMessage = function(){
+		if (chatMsg.val() === ''){
+			alert('Message is empty!!!');
+		} else {
+			socket.emit('user-send-message',['#{sessionID}','[#{item.name}]'+chatMsg.val()]);
+			chatBoard.append(
+				`<li class="clearfix message user">
+				<div class="sender">Ban gui:</div>
+				<div class="message">`+chatMsg.val()+`</div>
+				</li>`
+			);
+			chatBoard.scrollTop(chatBoard.get(0).scrollHeight);
+		}
+	}

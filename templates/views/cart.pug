@@ -1,0 +1,151 @@
+extends ../layouts/default
+
+block content
+	.container
+		if products.length
+			- var each_price = [];
+			.row
+				.col-sm-2
+					.checkbox
+						input#check_all(type="checkbox" value="")
+				.col-sm-4
+					h4 CHỌN TẤT CẢ #{products.length} SẢN PHẨM
+				.col-sm-3
+					h4 GIÁ
+				.col-sm-3
+					h4 SỐ LƯỢNG
+			- for (var x = 0; x < products.length; x++)
+				.row
+					.col-sm-2
+						.checkbox
+							input(type="checkbox" name="itemCheck" value=x)
+					.col-sm-4
+						button(onclick=`window.location.href='show?id='+${JSON.stringify(products[x].name)}`)
+							h4= products[x].name
+							img(src=products[x]._.heroImage.scale(100,100)).img-rounded
+					.col-sm-3
+						- var truePrice = products[x].price - products[x].price*products[x].sale/100;
+						- each_price[x] = truePrice*user.cartAmount[x];
+						.itemSalePrice #{truePrice} đ
+						if products[x].sale != 0
+							.itemPrice #{products[x].price} đ
+							.itemSale &nbsp&nbsp-#{products[x].sale}%
+					.col-sm-3
+						h4= user.cartAmount[x]
+						button.btn.btn-danger(type='button', data-toggle="modal", data-target="#myModal"+x): span.glyphicon.glyphicon-trash
+				.modal.fade(id="myModal"+x)
+					.modal-dialog.modal-lg.modal-dialog-centered
+						.modal-content
+							.modal-header
+								h4.modal-title Xác nhận xóa sản phẩm
+								button(type="button" class="close" data-dismiss="modal") &times;
+							.modal-body
+								h3 #{products[x].name} sẽ được xóa khỏi giỏ hàng. Bạn chắc chứ?
+							.modal-footer
+								button.btn.btn-danger(onclick=`window.location.href='cart?id='+${JSON.stringify(products[x].name)}`) Xóa
+								button.btn.btn-primary(data-dismiss="modal") Quay lại
+								
+			.container(style='float:right;')
+				
+				label Tong tien : &nbsp
+					span#total_price 0 đ
+				button#checkout.btn.btn-primary(disabled) Checkout
+					
+			.modal.fade#CheckoutModal
+				.modal-dialog.modal-lg.modal-dialog-centered
+					.modal-content
+						.modal-header
+							h4.modal-title Cảm ơn bạn đã mua hàng tại TA shop!!!
+							button(type="button" class="close" data-dismiss="modal") &times;
+						.modal-body
+							h3 Mời bạn chọn phương thức thanh toán
+							form#checkout-form(method='post')
+								input(type='hidden', name='action', value='checkout')
+								input#tong_tien(type='hidden', name='total_price')
+								input#checked_items(type='hidden', name='checked_items')
+								input#stripeToken(type='hidden', name='stripeToken', value='')
+								input#stripeEmail(type='hidden', name='stripeEmail', value='')
+								button.btn.btn-primary(type='submit') Sau khi nhận hàng
+								button.btn.btn-primary#customButton(type='button') Thanh toán bằng thẻ
+						.modal-footer
+							button.btn.btn-primary(data-dismiss="modal") Quay lại
+		else
+			h4 Không có sản phẩm nào trong giỏ hàng
+		button.btn.btn-danger(onclick=`window.location.href='gallery'`) TIẾP TỤC MUA SẮM
+block js
+	script(src="https://checkout.stripe.com/checkout.js")
+	script(type="text/javascript").
+		$(document).ready(function() {
+			var tong_tien = 0;
+			var final_items = [];
+			var list_price = !{JSON.stringify(each_price)};
+			var max_tien = list_price.reduce(function (accumulator, currentValue) {
+				return accumulator + currentValue;
+				}, 0);
+			
+			$('#check_all').click(function() {
+				if($(this).is(':checked')) {
+					$(':checkbox').prop('checked', true);
+					$('#total_price').text(max_tien+" đ");
+					tong_tien = max_tien;
+					final_items = !{JSON.stringify(user.cartItem)};
+					$("#checkout").prop('disabled', false);
+				} else {
+					$(':checkbox').prop('checked', false);
+					$('#total_price').text("0 đ");
+					tong_tien = 0;
+					final_items = [];
+					$("#checkout").prop('disabled', true);
+				}
+			});
+			
+			$("input[name='itemCheck']").click(function() {
+				if($(this).is(':checked')) {
+					tong_tien = tong_tien + list_price[$(this).val()];
+					$('#total_price').text(tong_tien+" đ");
+					final_items.push(!{JSON.stringify(user.cartItem)}[$(this).val()]);
+					$("#checkout").prop('disabled', false);
+				} else {
+					$('#check_all').prop('checked', false);
+					tong_tien = tong_tien - list_price[$(this).val()];
+					$('#total_price').text(tong_tien+" đ");
+					var item_pos = final_items.indexOf(!{JSON.stringify(user.cartItem)}[$(this).val()]);
+					final_items.splice(item_pos,1);
+					if (tong_tien == 0) {
+						$("#checkout").prop('disabled', true);
+					}
+				}
+			});
+			
+			$("#checkout").click(function() {
+				$("#tong_tien").val(tong_tien);
+				$("#checked_items").val(final_items);
+				$("#CheckoutModal").modal();
+			});
+			
+			var handler = StripeCheckout.configure({
+				key: 'pk_test_OmBncpdRBEUjXcEvCWLvFmVz',
+				image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
+				email: '#{user.email}',
+				allowRememberMe: false,
+				source: function(source) {
+					$("#stripeToken").val(source.id);
+					$("#stripeEmail").val(source.owner.email);
+					$("#checkout-form").submit();
+				}
+			});
+			
+			$('#customButton').on('click', function(e) {
+				handler.open({
+					name: 'TA shop',
+					description: 'Ban mua: ' + final_items,
+					currency: 'VND',
+					amount: tong_tien,
+				});
+				e.preventDefault();
+			});
+			// Close Checkout on page navigation
+			$(window).on('popstate', function() {
+				handler.close();
+			});
+		});

@@ -1,0 +1,135 @@
+.chatUser-window  {
+    width: 500px;
+    background-color: #fff;
+    text-align: left;
+    padding: 10px;
+    color: #333;
+    text-shadow: none;
+    font-size: 14px;
+		overflow: auto;
+}
+.chatUser-window .messages {
+	  height: 700px;
+    list-style: none;
+    margin: 0 0 50px;
+    padding: 0;
+		overflow-y: auto;
+}
+.chatUser-window .messages li {
+    width: 85%;
+    float: left;
+    padding: 10px;
+    border-radius: 5px 5px 5px 0;
+    font-size: 14px;
+    background: #c9f1e6;
+    margin-bottom: 10px;
+}
+.chatUser-window .messages li .sender {
+    font-weight: 600;
+}
+.chatUser-window .messages li.support {
+    float: right;
+    text-align: right;
+    color: #fff;
+    background-color: #e33d3d;
+    border-radius: 5px 5px 0 5px;
+}
+.chatUser-window .input {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+    left: 0;
+    width: 100%;
+    background: #f0f0f0;
+}
+.chatUser-window .input .form-group {
+    width: 70%;
+}
+.chatUser-window .input input {
+    width: 100%;
+}
+.chatUser-window .input button {
+    width: 10%;
+}
+.chatAdmin-window  {
+    width: 500px;
+    background-color: #fff;
+    text-align: left;
+    padding: 10px;
+    color: #333;
+    text-shadow: none;
+    font-size: 14px;
+		overflow: auto;
+}
+.chatAdmin-window .messages {
+	  height: 700px;
+    list-style: none;
+    margin: 0 0 50px;
+    padding: 0;
+		overflow-y: auto;
+}
+.chatAdmin-window .messages li {
+    width: 85%;
+    float: left;
+    padding: 10px;
+    border-radius: 5px 5px 5px 0;
+    font-size: 14px;
+    background: #c9f1e6;
+    margin-bottom: 10px;
+}
+.chatAdmin-window .messages li .sender {
+    font-weight: 600;
+}
+.chatAdmin-window .messages li.support {
+    float: right;
+    text-align: right;
+    color: #fff;
+    background-color: #e33d3d;
+    border-radius: 5px 5px 0 5px;
+}
+.chatAdmin-window .input {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+    left: 0;
+    width: 100%;
+    background: #f0f0f0;
+}
+.chatAdmin-window .input .form-group {
+    width: 70%;
+}
+.chatAdmin-window .input input {
+    width: 100%;
+}
+.chatAdmin-window .input button {
+    width: 10%;
+}
+.admin-list  {
+    width: 300px;
+    background-color: lightblue;
+    text-align: left;
+    padding: 10px;
+    color: #333;
+    text-shadow: none;
+    font-size: 14px;
+		overflow: auto;
+}
+.admin-list .messages {
+	  height: 700px;
+    list-style: none;
+    margin: 0 0 50px;
+    padding: 0;
+		overflow-y: auto;
+}
+.admin-list .messages li {
+    width: 85%;
+    float: left;
+    padding: 10px;
+    border-radius: 5px 5px 5px 0;
+    font-size: 14px;
+    background: #c9f1e6;
+    margin-bottom: 10px;
+}
+.admin-list .messages li .sender {
+    font-weight: 600;
+}

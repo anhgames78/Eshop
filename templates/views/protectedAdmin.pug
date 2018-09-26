@@ -1,0 +1,33 @@
+extends ../layouts/default
+
+block css
+	link(href="/styles/chatadmin.css", rel="stylesheet")
+		
+block content
+	.container-fluid.row
+		.col-sm-5.chatUser-window
+			h4 User chat room. Ban gui toi: 	
+				span.label.label-danger#userLabel Tat ca
+			ul.messages.clearfix
+			.input
+				form.form-inline#messageUser
+					button#userAll.btn.btn-primary(type="button") All
+					.form-group
+						input.form-control#userMessage(type="text" autocomplete="off" placeholder="Enter Message")
+					button#userButton.btn.btn-primary(type="button") Send
+		.col-sm-5.chatAdmin-window
+			h4 Admin chat room. Ban gui toi: 	
+				span.label.label-danger#adminLabel Tat ca
+			ul.messages.clearfix
+			.input
+				form.form-inline#messageAdmin
+					button#adminAll.btn.btn-primary(type="button") All
+					.form-group
+						input.form-control#adminMessage(type="text" autocomplete="off" placeholder="Enter Message")
+					button#adminButton.btn.btn-primary(type="button") Send
+		.col-sm-2.admin-list
+			h4 Xin chao #{user.email}!!!
+			h4 List of Admins:
+			ul.messages.clearfix
+block js
+	include chatadminjs.pug

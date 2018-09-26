@@ -1,0 +1,108 @@
+script(src="/socket.io/socket.io.js")
+script.
+	const chatPage        = $(document);
+	const chatUserWindow  = $('.chatUser-window');
+	const chatAdminWindow = $('.chatAdmin-window');
+	const AdminList       = $('.admin-list').find('ul.messages');
+	
+	const chatUserBoard   = chatUserWindow.find('ul.messages');
+	const chatUserMsg     = chatUserWindow.find('#userMessage');
+	const chatUserButton  = chatUserWindow.find('#userButton');
+	const chatUserAll     = chatUserWindow.find('#userAll');
+	const chatAdminBoard  = chatAdminWindow.find('ul.messages');
+	const chatAdminMsg    = chatAdminWindow.find('#adminMessage');
+	const chatAdminButton = chatAdminWindow.find('#adminButton');
+	const chatAdminAll    = chatAdminWindow.find('#adminAll');
+	var socket = io.connect();
+	
+	chatPage.ready(function() {
+		chatUserButton.click(function(){SendUserMessage()});
+		chatUserMsg.keydown(function(event){
+			if ( event.which == 13 ){
+				SendUserMessage();
+				event.preventDefault();
+			}
+		});
+		
+	chatUserAll.click(function(){chatUserWindow.find('#userLabel').text('Tat ca')});
+		
+		chatAdminButton.click(function(){SendAdminMessage()});
+		chatAdminMsg.keydown(function(event){
+			if ( event.which == 13 ){
+				SendAdminMessage();
+				event.preventDefault();
+			}
+		});
+		
+		chatAdminAll.click(function(){chatAdminWindow.find('#adminLabel').text('Tat ca')});
+		
+		socket.emit('initAdmin', ['#{user.email}','#{user.isAdmin}','#{sessionID}']);
+		
+		socket.on('danh-sach-admin',function(data){
+			AdminList.empty();
+			data.forEach(function(element) {
+				AdminList.append(
+					`<li><div class="sender"><a onClick="chatAdminWindow.find('#adminLabel').text($(this).text());">`+element+`</a></div></li>`
+				);
+				AdminList.scrollTop(AdminList.get(0).scrollHeight);
+			});
+		});
+		
+		socket.on('relay-user-message', function(data){
+			chatUserBoard.append(
+				`<li class="clearfix message support">
+				<div class="sender"><a onClick="chatUserWindow.find('#userLabel').text($(this).text());">`+data[0]+`</a> vua gui:</div>
+				<div class="message">`+data[1]+`</div>
+				</li>`
+			);
+			chatUserBoard.scrollTop(chatUserBoard.get(0).scrollHeight);
+		});
+		
+		socket.on('relay-admin-message', function(data){
+			chatAdminBoard.append(
+				`<li class="clearfix message support">
+				<div class="sender"><a onClick="chatAdminWindow.find('#adminLabel').text($(this).text());">`+data[0]+`</a> vua gui:</div>
+				<div class="message">`+data[1]+`</div>
+				</li>`
+			);
+			chatAdminBoard.scrollTop(chatAdminBoard.get(0).scrollHeight);
+		});
+	});	
+	
+	var SendUserMessage = function(){
+		if (chatUserMsg.val() === ''){
+			alert('Message is empty!!!');
+		} else {
+			if (chatUserWindow.find('#userLabel').text() === 'Tat ca'){
+				socket.emit('admin-send-allUser',chatUserMsg.val());
+			} else {
+				socket.emit('admin-send-user',[chatUserWindow.find('#userLabel').text(),chatUserMsg.val()]);
+			}
+			chatUserBoard.append(
+				`<li class="clearfix message user">
+				<div class="sender">Ban gui toi `+chatUserWindow.find('#userLabel').text()+`:</div>
+				<div class="message">`+chatUserMsg.val()+`</div>
+				</li>`
+			);
+			chatUserBoard.scrollTop(chatUserBoard.get(0).scrollHeight);
+		}
+	}
+	
+		var SendAdminMessage = function(){
+		if (chatAdminMsg.val() === ''){
+			alert('Message is empty!!!');
+		} else {
+			if (chatAdminWindow.find('#adminLabel').text() === 'Tat ca'){
+				socket.emit('admin-send-allAdmin',chatAdminMsg.val());
+			} else {
+				socket.emit('admin-send-admin',[chatAdminWindow.find('#adminLabel').text(),chatAdminMsg.val()]);
+			}
+			chatAdminBoard.append(
+				`<li class="clearfix message user">
+				<div class="sender">Ban gui toi `+chatAdminWindow.find('#adminLabel').text()+`:</div>
+				<div class="message">`+chatAdminMsg.val()+`</div>
+				</li>`
+			);
+			chatAdminBoard.scrollTop(chatAdminBoard.get(0).scrollHeight);
+		}
+	}

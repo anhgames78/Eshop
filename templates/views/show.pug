@@ -1,0 +1,97 @@
+extends ../layouts/default
+
+block css
+	link(href="/styles/chat.css", rel="stylesheet")
+
+block content
+	.container.row
+		.col-sm-6
+			h1#itemname= item.name
+			img#main_img(src=item._.heroImage.scale(500,500)).img-rounded
+			p So luong nguoi da xem san pham nay: #{item.views}
+		.col-sm-6
+			img(src="images/Penguins.jpg" height="600" width="600")
+		.col-sm-1
+			button(onclick=`$("#main_img").attr("src","`+item._.heroImage.scale(500,500)+`")`)
+				img(src=item._.heroImage.thumbnail(80,80)).img-rounded
+		each image in item.images
+			.col-sm-1
+				button(onclick=`$("#main_img").attr("src","`+image.scale(500,500)+`")`)
+					img(src=image.thumbnail(80,80)).img-rounded
+	.container
+		- var truePrice = item.price - item.price*item.sale/100;
+		.itemSalePrice #{truePrice} đ
+		if item.sale != 0
+			.itemPrice #{item.price} đ
+			.itemSale &nbsp&nbsp-#{item.sale}%
+		.container(style='float:right;')
+			button.btn.btn-success#downbutton(type='button', disabled, onclick='downitem();'): span.glyphicon.glyphicon-minus
+			input#itemcount(type='number', oninput='onitem(10);', value=1, size=3)
+			button.btn.btn-success#upbutton(type='button', onclick='upitem(10);'): span.glyphicon.glyphicon-plus
+			button#checkout.btn.btn-primary Add to Cart
+
+	.modal.fade#myModal
+		.modal-dialog.modal-lg.modal-dialog-centered
+			.modal-content
+				.modal-header
+					if user.isMimic
+						h4.modal-title Welcome to TA shop! Please login.
+					else
+						h4.modal-title Sản phẩm mới được thêm vào giỏ hàng của bạn
+				.modal-body
+					if user.isMimic
+						.container
+							h3 Vui lòng đăng nhập để tiếp tục mua hàng!!!
+					else
+						.container Tổng cộng:&nbsp&nbsp
+							span#tongtien #{truePrice}x1 = #{truePrice} đ   
+				.modal-footer
+					if user.isMimic
+						button.btn.btn-danger(onclick=`window.location.href='signup'`) Đăng nhập
+					else
+						form(method='post')
+							input(type='hidden', name='action', value='show')
+							input.itemcount(type='hidden', name='itemcount')
+							button(type='submit').btn.btn-primary Xác nhận và đến giỏ hàng
+	include chat.pug
+block js
+	include chatjs.pug
+	script(type="text/javascript").
+	
+		$("#checkout").click(function() {
+			$(".itemcount").val($("#itemcount").val());
+			$("#tongtien").text(#{truePrice}+"x"+$("#itemcount").val()+" = "+ #{truePrice}*$("#itemcount").val() + " đ");
+			$("#myModal").modal();
+		});
+	
+	script(type="text/javascript").
+
+		function onitem(number){
+			if ($("#itemcount").val() <= 1) {
+				$("#itemcount").val(1);
+				$("#downbutton").prop('disabled', true);
+				$("#upbutton").prop('disabled', false);
+			} else if ($("#itemcount").val() < number) {
+				$("#downbutton").prop('disabled', false);
+				$("#upbutton").prop('disabled', false);
+			} else {
+				$("#itemcount").val(number);
+				$("#upbutton").prop('disabled', true);
+			}
+		}
+		
+		function downitem(){
+			$("#upbutton").prop('disabled', false);
+			$("#itemcount").val($("#itemcount").val()-1);
+			if ($("#itemcount").val() == 1){
+				$("#downbutton").prop('disabled', true);
+			}
+		}
+		
+		function upitem(number){
+			$("#downbutton").prop('disabled', false);
+			$("#itemcount").val($("#itemcount").val()-(-1))
+			if ($("#itemcount").val() == number){
+				$("#upbutton").prop('disabled', true);
+			}
+		}

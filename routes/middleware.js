@@ -9,7 +9,6 @@
  */
 var _ = require('lodash');
 
-
 /**
 	Initialises the standard view locals
 
@@ -19,12 +18,26 @@ var _ = require('lodash');
 */
 exports.initLocals = function (req, res, next) {
 	res.locals.navLinks = [
-		{ label: 'Home', key: 'home', href: '/' },
-		{ label: 'Blog', key: 'blog', href: '/blog' },
 		{ label: 'Gallery', key: 'gallery', href: '/gallery' },
 		{ label: 'Contact', key: 'contact', href: '/contact' },
+		{ label: 'Protected', key: 'protected', href: '/protected' },
+		{ label: 'Cart', key: 'cart', href: '/cart' },
+		{ label: 'Sign Up', key: 'signup', href: '/signup' },
 	];
-	res.locals.user = req.user;
+	if (!req.user) {
+		res.locals.user = {'email':req.sessionID,'isAdmin':false, 'isMimic':true};
+	} else {
+		res.locals.user = req.user;
+		res.locals.user.isMimic = false;
+	}
+	res.locals.sessionID = req.sessionID;
+	if (req.path !== '/show') { req.session.newShow = true; }
+	if (req.path !== '/gallery') { 
+		req.session.cat = ['dientu','phukien','thoitrang'];
+		req.session.sort = 'name';
+	} 
+
+	
 	next();
 };
 
@@ -50,7 +63,7 @@ exports.flashMessages = function (req, res, next) {
 exports.requireUser = function (req, res, next) {
 	if (!req.user) {
 		req.flash('error', 'Please sign in to access this page.');
-		res.redirect('/keystone/signin');
+		res.redirect('/signup');
 	} else {
 		next();
 	}
